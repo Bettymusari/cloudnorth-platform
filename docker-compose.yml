@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   frontend:
     build:
@@ -9,10 +8,23 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - PORT=3000
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - /app/.next  # Hot reload for Next.js
     command: npm run dev
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
 
   backend:
     build:
@@ -23,12 +35,22 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://user:pass@db:5432/cloudnorth
+      - PORT=3001
+      - CORS_ORIGIN=http://localhost:3000
     volumes:
       - ./backend:/app
       - /app/node_modules
     command: npm run dev
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
 
   db:
     image: postgres:15-alpine
@@ -40,6 +62,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d cloudnorth"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
 volumes:
   postgres_data:
