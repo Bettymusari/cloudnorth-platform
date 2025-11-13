@@ -18,10 +18,9 @@ pipeline {
             }
             post {
                 always {
-                    // Only publish JUnit results if the file exists and has content
+                    // Only publish JUnit results if the file exists
                     script {
-                        def testResults = findFiles(glob: 'backend/test-results/junit.xml')
-                        if (testResults) {
+                        if (fileExists('backend/test-results/junit.xml')) {
                             junit 'backend/test-results/junit.xml'
                         } else {
                             echo 'No test results found, skipping JUnit report'
@@ -50,8 +49,7 @@ pipeline {
             post {
                 always {
                     script {
-                        def testResults = findFiles(glob: 'frontend/test-results/junit.xml')
-                        if (testResults) {
+                        if (fileExists('frontend/test-results/junit.xml')) {
                             junit 'frontend/test-results/junit.xml'
                         } else {
                             echo 'No test results found, skipping JUnit report'
