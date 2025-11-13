@@ -18,7 +18,15 @@ pipeline {
             }
             post {
                 always {
-                    junit 'backend/test-results/junit.xml'  // Capture test results
+                    // Only publish JUnit results if the file exists and has content
+                    script {
+                        def testResults = findFiles(glob: 'backend/test-results/junit.xml')
+                        if (testResults) {
+                            junit 'backend/test-results/junit.xml'
+                        } else {
+                            echo 'No test results found, skipping JUnit report'
+                        }
+                    }
                     publishHTML([
                         allowMissing: true,
                         alwaysLinkToLastBuild: true,
@@ -41,7 +49,14 @@ pipeline {
             }
             post {
                 always {
-                    junit 'frontend/test-results/junit.xml'  // Capture test results
+                    script {
+                        def testResults = findFiles(glob: 'frontend/test-results/junit.xml')
+                        if (testResults) {
+                            junit 'frontend/test-results/junit.xml'
+                        } else {
+                            echo 'No test results found, skipping JUnit report'
+                        }
+                    }
                     publishHTML([
                         allowMissing: true,
                         alwaysLinkToLastBuild: true,
