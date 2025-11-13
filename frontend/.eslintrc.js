@@ -21,7 +21,8 @@ module.exports = {
         'react-hooks'
     ],
     rules: {
-        'react/react-in-jsx-scope': 'off', // Not needed in Next.js
+        'react/react-in-jsx-scope': 'off',
+        'react/prop-types': 'off', // Disable PropTypes requirement
         'no-unused-vars': 'warn',
         'no-console': 'warn'
     },
