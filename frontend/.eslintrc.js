@@ -5,15 +5,29 @@ module.exports = {
         node: true
     },
     extends: [
-        'eslint:recommended'
+        'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:react-hooks/recommended'
     ],
     parserOptions: {
         ecmaVersion: 'latest',
-        sourceType: 'module'
+        sourceType: 'module',
+        ecmaFeatures: {
+            jsx: true
+        }
     },
+    plugins: [
+        'react',
+        'react-hooks'
+    ],
     rules: {
-        // Basic rules that will work without additional dependencies
+        'react/react-in-jsx-scope': 'off', // Not needed in Next.js
         'no-unused-vars': 'warn',
         'no-console': 'warn'
+    },
+    settings: {
+        react: {
+            version: 'detect'
+        }
     }
 };
