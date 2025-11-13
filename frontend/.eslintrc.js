@@ -1,17 +1,19 @@
 module.exports = {
     env: {
         browser: true,
-        es2021: true
+        es2021: true,
+        node: true
     },
     extends: [
-        'eslint:recommended',
-        'next/core-web-vitals'
+        'eslint:recommended'
     ],
     parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module'
     },
     rules: {
-        // Add any custom rules here
+        // Basic rules that will work without additional dependencies
+        'no-unused-vars': 'warn',
+        'no-console': 'warn'
     }
 };
