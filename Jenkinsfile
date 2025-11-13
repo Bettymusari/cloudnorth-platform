@@ -1,47 +1,47 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
+
         stage('Backend - Lint & Test') {
             steps {
                 dir('backend') {
                     sh 'npm ci'  // Clean install for CI
                     sh 'npm run lint'  // ESLint for backend
-                    sh 'npm test -- --coverage --passWithNoTests'  // Jest tests
+                    sh 'npm test'  // Jest tests (coverage configured in package.json)
                 }
             }
             post {
                 always {
-                    junit 'backend/test-results.xml'  // Capture test results
+                    junit 'backend/test-results/junit.xml'  // Capture test results
                     publishHTML([
                         allowMissing: true,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
-                        reportDir: 'backend/coverage',
-                        reportFiles: 'lcov-report/index.html',
+                        reportDir: 'backend/coverage/lcov-report',
+                        reportFiles: 'index.html',
                         reportName: 'Backend Coverage Report'
                     ])
                 }
             }
         }
-        
+
         stage('Frontend - Lint & Test') {
             steps {
                 dir('frontend') {
                     sh 'npm ci'  // Clean install for CI
                     sh 'npm run lint'  // ESLint for frontend
-                    sh 'npm test -- --coverage --watchAll=false --passWithNoTests'  // Jest tests
+                    sh 'npm test'  // Jest tests
                 }
             }
             post {
                 always {
-                    junit 'frontend/test-results.xml'  // Capture test results
+                    junit 'frontend/test-results/junit.xml'  // Capture test results
                     publishHTML([
                         allowMissing: true,
                         alwaysLinkToLastBuild: true,
@@ -53,7 +53,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
@@ -61,7 +61,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Docker Build Test') {
             steps {
                 script {
@@ -70,7 +70,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy to Staging') {
             steps {
                 script {
@@ -91,7 +91,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             echo 'Pipeline execution completed'
