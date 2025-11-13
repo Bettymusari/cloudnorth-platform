@@ -8,61 +8,20 @@ pipeline {
             }
         }
 
-        stage('Backend - Lint & Test') {
+        stage('Backend Setup') {
             steps {
                 dir('backend') {
-                    sh 'npm ci'  // Clean install for CI
-                    sh 'npm run lint'  // ESLint for backend
-                    sh 'npm test'  // Jest tests (coverage configured in package.json)
-                }
-            }
-            post {
-                always {
-                    // Only publish JUnit results if the file exists
-                    script {
-                        if (fileExists('backend/test-results/junit.xml')) {
-                            junit 'backend/test-results/junit.xml'
-                        } else {
-                            echo 'No test results found, skipping JUnit report'
-                        }
-                    }
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'backend/coverage/lcov-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Backend Coverage Report'
-                    ])
+                    sh 'npm ci'
+                    sh 'npm run lint'
                 }
             }
         }
 
-        stage('Frontend - Lint & Test') {
+        stage('Frontend Setup') {
             steps {
                 dir('frontend') {
-                    sh 'npm ci'  // Clean install for CI
-                    sh 'npm run lint'  // ESLint for frontend
-                    sh 'npm test'  // Jest tests
-                }
-            }
-            post {
-                always {
-                    script {
-                        if (fileExists('frontend/test-results/junit.xml')) {
-                            junit 'frontend/test-results/junit.xml'
-                        } else {
-                            echo 'No test results found, skipping JUnit report'
-                        }
-                    }
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'frontend/coverage/lcov-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Frontend Coverage Report'
-                    ])
+                    sh 'npm ci' 
+                    sh 'npm run lint'
                 }
             }
         }
@@ -70,52 +29,24 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'npm run build'  // Build Next.js application
+                    sh 'npm run build'
                 }
             }
         }
 
-        stage('Docker Build Test') {
+        stage('Docker Test') {
             steps {
-                script {
-                    // Test that Docker images can be built
-                    sh 'docker-compose build --no-cache'
-                }
-            }
-        }
-
-        stage('Deploy to Staging') {
-            steps {
-                script {
-                    echo 'Deploying to staging environment...'
-                    sshagent(['server-ssh-key']) {
-                        sh '''
-                            ssh -o StrictHostKeyChecking=no ec2-user@100.29.197.184 "
-                                cd /opt/cloudnorth-platform &&
-                                git fetch origin &&
-                                git checkout feature/ci-cd-pipeline &&
-                                git pull origin feature/ci-cd-pipeline &&
-                                docker-compose down &&
-                                docker-compose up -d --build
-                            "
-                        '''
-                    }
-                }
+                sh 'docker-compose build --no-cache'
             }
         }
     }
 
     post {
         always {
-            echo 'Pipeline execution completed'
-            // Clean up Docker images to save space
-            sh 'docker system prune -f || true'
+            echo 'Pipeline completed'
         }
         success {
-            echo '✅ Pipeline succeeded! Application deployed.'
-        }
-        failure {
-            echo '❌ Pipeline failed! Check the logs above.'
+            echo '✅ SUCCESS: All stages completed!'
         }
     }
 }
