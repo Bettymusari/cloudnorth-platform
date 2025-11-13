@@ -1,7 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_BUILDKIT = '1'
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -20,7 +25,7 @@ pipeline {
         stage('Frontend Setup') {
             steps {
                 dir('frontend') {
-                    sh 'npm ci' 
+                    sh 'npm ci'
                     sh 'npm run lint'
                 }
             }
@@ -42,7 +47,8 @@ pipeline {
 
         stage('Docker Test') {
             steps {
-                sh 'docker-compose build --no-cache'
+                // Use new Compose v2 syntax
+                sh 'docker compose build --no-cache'
             }
         }
     }
