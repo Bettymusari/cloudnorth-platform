@@ -6,11 +6,14 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies (production only)
 RUN npm ci --only=production
 
 # Copy source code
 COPY . .
+
+# 🔥 Ensure public folder always exists (fix Buildx COPY error)
+RUN mkdir -p /app/public
 
 # Build the application (Next.js)
 RUN npm run build
@@ -27,11 +30,10 @@ RUN addgroup --system --gid 1001 nodejs \
 # Copy Next.js build output
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package.json .
 
-# Optional: Copy public folder if it exists
-RUN mkdir -p ./public
-COPY --from=builder /app/public ./public 2>/dev/null || true
+# Copy public folder (now guaranteed to exist)
+COPY --from=builder /app/public ./public
 
 USER nextjs
 
