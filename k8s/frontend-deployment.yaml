@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudnorth-frontend
+  labels:
+    app: cloudnorth-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloudnorth-frontend
+  template:
+    metadata:
+      labels:
+        app: cloudnorth-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: bettym72/cloudnorth-frontend:latest
+        ports:
+        - containerPort: 3000

@@ -6,10 +6,13 @@ pipeline {
         DOCKERHUB_USERNAME = 'bettym72'
         BACKEND_IMAGE = 'bettym72/cloudnorth-backend'
         FRONTEND_IMAGE = 'bettym72/cloudnorth-frontend'
+        AWS_REGION = 'us-east-1'
+        EKS_CLUSTER = 'cloudnorth-cluster'
     }
 
     stages {
 
+        /* -------------------- CHECKOUT -------------------- */
         stage('Checkout') {
             steps {
                 withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
@@ -23,6 +26,7 @@ pipeline {
             }
         }
 
+        /* -------------------- BACKEND TEST -------------------- */
         stage('Backend Install & Test') {
             steps {
                 dir('cloudnorth-platform/backend') {
@@ -33,6 +37,7 @@ pipeline {
             }
         }
 
+        /* -------------------- FRONTEND TEST -------------------- */
         stage('Frontend Install & Test') {
             steps {
                 dir('cloudnorth-platform/frontend') {
@@ -43,6 +48,7 @@ pipeline {
             }
         }
 
+        /* -------------------- DOCKER: BACKEND -------------------- */
         stage('Build Backend Image') {
             steps {
                 sh """
@@ -51,6 +57,7 @@ pipeline {
             }
         }
 
+        /* -------------------- DOCKER: FRONTEND -------------------- */
         stage('Build Frontend Image') {
             steps {
                 sh """
@@ -59,26 +66,50 @@ pipeline {
             }
         }
 
+        /* -------------------- PUSH IMAGES -------------------- */
         stage('Push Images to DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS, usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh """
+                    sh '''
                         echo "$PASS" | docker login -u "$USER" --password-stdin
                         docker push ${BACKEND_IMAGE}:latest
                         docker push ${FRONTEND_IMAGE}:latest
-                    """
+                    '''
                 }
             }
         }
 
+        /* -------------------- DEPLOY TO EKS -------------------- */
+        stage('Deploy to EKS') {
+            steps {
+                sh '''
+                    echo "🔹 Updating kubeconfig for cluster..."
+                    aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER}
+
+                    echo "🔹 Applying Kubernetes manifests..."
+                    kubectl apply -f cloudnorth-platform/k8s/backend-deployment.yaml
+                    kubectl apply -f cloudnorth-platform/k8s/backend-service.yaml
+
+                    kubectl apply -f cloudnorth-platform/k8s/frontend-deployment.yaml
+                    kubectl apply -f cloudnorth-platform/k8s/frontend-service.yaml
+
+                    echo "🔹 Waiting for rollouts..."
+                    kubectl rollout status deployment/cloudnorth-backend --timeout=120s
+                    kubectl rollout status deployment/cloudnorth-frontend --timeout=120s
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo "🎉 SUCCESS: Backend & Frontend images pushed!"
+            echo "🎉 SUCCESS: CI/CD full pipeline — build, push, deploy completed!"
         }
         failure {
-            echo "❌ Pipeline failed!"
+            echo "❌ Pipeline failed. Review logs."
+        }
+        always {
+            echo "Pipeline completed."
         }
     }
 }
