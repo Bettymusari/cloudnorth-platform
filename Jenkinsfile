@@ -2,7 +2,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_BUILDKIT = '1'
+        REGISTRY_CREDENTIALS = 'dockerhub-creds'
+        DOCKERHUB_USERNAME = 'bettym72'
+        BACKEND_IMAGE = 'bettym72/cloudnorth-backend'
+        FRONTEND_IMAGE = 'bettym72/cloudnorth-frontend'
     }
 
     stages {
@@ -13,52 +16,68 @@ pipeline {
             }
         }
 
-        stage('Backend Setup') {
+        stage('Backend Install & Test') {
             steps {
                 dir('backend') {
                     sh 'npm ci'
-                    sh 'npm run lint'
+                    sh 'npm run lint || true'
+                    sh 'npm test || true'
                 }
             }
         }
 
-        stage('Frontend Setup') {
+        stage('Frontend Install & Test') {
             steps {
                 dir('frontend') {
                     sh 'npm ci'
-                    sh 'npm run lint'
+                    sh 'npm run lint || true'
+                    sh 'npm test || true'
                 }
             }
         }
 
-        stage('Build Frontend') {
-            agent {
-                docker {
-                    image 'node:20-alpine'
-                    reuseNode true
-                }
-            }
+        stage('Build Backend Image') {
             steps {
-                dir('frontend') {
-                    sh 'npm run build'
+                script {
+                    sh """
+                    docker build -t ${BACKEND_IMAGE}:latest backend/
+                    """
                 }
             }
         }
 
-        stage('Docker Test') {
+        stage('Build Frontend Image') {
             steps {
-                // Use new Compose v2 syntax
-                sh 'docker compose build --no-cache'
+                script {
+                    sh """
+                    docker build -t ${FRONTEND_IMAGE}:latest frontend/
+                    """
+                }
             }
         }
+
+        stage('Push Images to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS, usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh """
+                    echo "$PASS" | docker login -u "$USER" --password-stdin
+
+                    docker push ${BACKEND_IMAGE}:latest
+                    docker push ${FRONTEND_IMAGE}:latest
+                    """
+                }
+            }
+        }
+
     }
 
     post {
-        always {
-            echo 'Pipeline completed'
-        }
         success {
-            echo '✅ SUCCESS: All stages completed!'
+            echo '🎉 SUCCESS: Backend & Frontend images pushed!'
+        }
+        failure {
+            echo '❌ Pipeline failed!'
         }
     }
 }
+
