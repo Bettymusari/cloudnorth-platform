@@ -12,13 +12,20 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                    sh '''
+                        rm -rf cloudnorth-platform || true
+                        git clone https://$GITHUB_TOKEN@github.com/Bettymusari/cloudnorth-platform.git
+                        cd cloudnorth-platform
+                        git checkout feature/ci-cd-pipeline
+                    '''
+                }
             }
         }
 
         stage('Backend Install & Test') {
             steps {
-                dir('backend') {
+                dir('cloudnorth-platform/backend') {
                     sh 'npm ci'
                     sh 'npm run lint || true'
                     sh 'npm test || true'
@@ -28,7 +35,7 @@ pipeline {
 
         stage('Frontend Install & Test') {
             steps {
-                dir('frontend') {
+                dir('cloudnorth-platform/frontend') {
                     sh 'npm ci'
                     sh 'npm run lint || true'
                     sh 'npm test || true'
@@ -38,21 +45,17 @@ pipeline {
 
         stage('Build Backend Image') {
             steps {
-                script {
-                    sh """
-                    docker build -t ${BACKEND_IMAGE}:latest backend/
-                    """
-                }
+                sh """
+                    docker build -t ${BACKEND_IMAGE}:latest cloudnorth-platform/backend/
+                """
             }
         }
 
         stage('Build Frontend Image') {
             steps {
-                script {
-                    sh """
-                    docker build -t ${FRONTEND_IMAGE}:latest frontend/
-                    """
-                }
+                sh """
+                    docker build -t ${FRONTEND_IMAGE}:latest cloudnorth-platform/frontend/
+                """
             }
         }
 
@@ -60,10 +63,9 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS, usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
-                    echo "$PASS" | docker login -u "$USER" --password-stdin
-
-                    docker push ${BACKEND_IMAGE}:latest
-                    docker push ${FRONTEND_IMAGE}:latest
+                        echo "$PASS" | docker login -u "$USER" --password-stdin
+                        docker push ${BACKEND_IMAGE}:latest
+                        docker push ${FRONTEND_IMAGE}:latest
                     """
                 }
             }
@@ -73,11 +75,10 @@ pipeline {
 
     post {
         success {
-            echo '🎉 SUCCESS: Backend & Frontend images pushed!'
+            echo "🎉 SUCCESS: Backend & Frontend images pushed!"
         }
         failure {
-            echo '❌ Pipeline failed!'
+            echo "❌ Pipeline failed!"
         }
     }
 }
-
