@@ -1,0 +1,23 @@
+{
+  "name": "cloudnorth-frontend",
+  "version": "1.0.0",
+  "description": "CloudNorth E-commerce Frontend",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "next": "^16.0.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "eslint": "8.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "jest": "29.0.0"
+  }
+}
