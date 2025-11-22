@@ -1,213 +1,375 @@
-# 🛍️ CloudNorth E-commerce Platform
+🛍️ CloudNorth E-Commerce Platform
 
-A modern, scalable e-commerce platform built with cloud-native technologies. This project demonstrates full-stack development with infrastructure as code, container orchestration, and professional DevOps practices.
+A fully cloud-native, production-grade e-commerce deployment showcasing Infrastructure as Code, Kubernetes, CI/CD automation, containerization, and observability — designed and implemented end-to-end by Betty Musari.
 
-## 🎯 Project Phases
+This project demonstrates real-world DevOps engineering: building, deploying, scaling, automating, and monitoring a complete platform on AWS.
 
-### ✅ Phase 1: Cloud Infrastructure (Complete)
-**Infrastructure as Code with AWS and Terraform**
+🔥 Project Overview
 
-#### 🏗️ Architecture Deployed:
-Internet → ALB → EKS Cluster → Microservices → RDS
-↓
-S3 Static Assets
+CloudNorth is a full DevOps simulation taking an e-commerce platform from local code → cloud infrastructure → automated CI/CD → Kubernetes deployment → monitoring.
 
-text
+It is built in 7 professional DevOps phases:
 
-#### 📦 Infrastructure Components:
-- **VPC Network**: Custom VPC with public and private subnets across multiple AZs
-- **Compute**: 
-  - Frontend EC2 instance (Ubuntu with Apache) - Public subnet
-  - Backend EC2 instance - Private subnet
-  - EKS Kubernetes cluster with 2 worker nodes (auto-scaling 1-3 nodes)
-- **Data Layer**:
-  - RDS MySQL database in private subnet
-  - S3 bucket for static assets with versioning
-- **Networking**:
-  - Application Load Balancer (ALB) with HTTP/HTTPS listeners
-  - NAT Gateway for private subnet internet access
-  - Security groups with least-privilege access
-- **Monitoring**:
-  - CloudWatch dashboard for infrastructure metrics
-  - SNS alerts for critical issues
-  - Budget monitoring and alerts
+Phase	Description	Status
+1	AWS infrastructure (VPC, EC2, EKS, RDS, ALB, S3) with Terraform	✅ Done
+2	Professional GitHub repository + branching workflow	✅ Done
+3	Jenkins installation, container agents & CI pipeline	✅ Done
+4	Full App Containerization (Dockerfiles, Compose)	✅ Done
+5	EKS Deployment with Helm + ALB Controller	✅ Done
+6	Automated CI/CD (Jenkins → ECR → Helm → EKS)	✅ Done
+7	Monitoring, Logging, Alerts, Blue/Green Deployments	✅ Done
+🏗️ PHASE 1 — Cloud Infrastructure (AWS + Terraform)
 
-#### 🔧 Technologies Used:
-- **Terraform**: Infrastructure as Code
-- **AWS**: EC2, EKS, RDS, S3, ALB, VPC, CloudWatch
-- **Modular Design**: Reusable Terraform modules
+CloudNorth runs on a fully automated AWS foundation using Terraform modules.
 
-#### 🌐 Live Endpoints:
-- Frontend: http://54.196.1.117
-- ALB: http://cloudnorth-alb-1784847908.us-east-1.elb.amazonaws.com
+🌐 High-Level Architecture
+flowchart TD
+    User --> ALB["Application Load Balancer"]
+    ALB --> EKS["EKS Cluster"]
+    EKS --> FE["Frontend Pod"]
+    EKS --> BE["Backend Pod"]
+    BE --> RDS["Amazon RDS MySQL"]
+    FE --> S3["S3 Static Assets"]
 
-### ✅ Phase 2: Source Code Management (Complete)
-**Professional Git Workflow and Team Collaboration**
+✔️ Components Deployed
 
-#### 📁 Repository Structure:
+VPC with 2 public + 2 private subnets
+
+EKS cluster (1.28) with managed node group
+
+ALB for traffic routing
+
+EC2 instances (frontend & backend experimental nodes)
+
+RDS MySQL in private subnet
+
+S3 Bucket for static assets
+
+CloudWatch Dashboards + SNS Alerts
+
+NAT Gateway + IGW
+
+Security groups with least-privilege rules
+
+Live Endpoints
+
+Frontend: http://54.196.1.117
+
+ALB: (Redacted for privacy — visible in AWS console)
+
+🔐 PHASE 2 — Source Code Management (GitHub Workflow)
+
+A professional software-engineering workflow was established.
+
+📁 Final Repository Structure
 cloudnorth-platform/
-├── frontend/ # Next.js React application
-├── backend/ # Node.js Express API
-├── infrastructure/ # Terraform, Docker, DevOps scripts
-├── .github/ # PR templates & workflow definitions
-├── docs/ # Project documentation
-├── README.md # This file
-├── CONTRIBUTING.md # Development guidelines
-└── LICENSE # MIT License
+├── backend/          # Node.js Express API
+├── frontend/         # Next.js 14 Web App
+├── infrastructure/   # Terraform + DevOps scripts
+├── myapp-chart/      # Helm charts for Kubernetes
+├── .github/          # PR templates & workflows
+├── docs/             # Architecture diagrams, guides
+└── README.md
 
-text
+🎯 Git Workflow
 
-#### 🔒 Git Workflow Established:
-- **Branch Strategy**: main (production) ← dev (development) ← feature/* (work)
-- **Branch Protection**: PR requirements, conversation resolution, no bypassing
-- **Code Review**: Self-review process for solo development
-- **PR Templates**: Standardized pull request format
+main → Production
 
-#### 📋 Development Practices:
-- **Commit Convention**: feat/fix/docs/style/refactor/test/chore
-- **Documentation**: Comprehensive CONTRIBUTING.md
-- **Quality Gates**: Branch protection enforcing PR workflow
-- **Professional Habits**: Solo developer discipline
+dev → Integration environment
 
-### 🔄 Phase 3: Containerization & CI/CD (Next)
-**Docker, GitHub Actions, and Automated Deployment**
+feature/* → New features
 
-#### Planned Components:
-- 🐳 Docker containers for frontend and backend
-- ⚙️ GitHub Actions workflows
-- 📦 Container registry (ECR)
-- 🔄 CI/CD pipeline to EKS
-- ✅ Automated testing
+fix/* → Bug fixes
 
-## 🚀 Quick Start
+Protections Enabled
 
-### Prerequisites
-- Node.js 18+
-- Python 3.9+
-- Docker & Docker Compose
-- AWS CLI configured
-- Terraform 1.0+
+Required Pull Requests
 
-### Development Setup
-```bash
-# Clone and setup
+Required conversation resolution
+
+No direct commits to main/dev
+
+🐳 PHASE 3 — Jenkins CI Pipeline (Build & Test)
+
+Jenkins was deployed on EC2 and integrated with:
+
+GitHub Webhooks
+
+Docker Engine
+
+Kubernetes CLI
+
+ECR authentication
+
+Jenkins inbound-agent (Docker)
+
+A full CI pipeline executes:
+
+Checkout
+
+Backend build & lint
+
+Frontend build inside Node 20 container
+
+Docker Compose build test
+
+Artifact verification
+
+📦 PHASE 4 — Full Application Containerization
+
+Both services were containerized using multi-stage Dockerfiles.
+
+Frontend Dockerfile Highlights
+
+Node 20 base image
+
+Production build
+
+Runs with Next.js server (port 3000)
+
+Backend Dockerfile
+
+Node 20
+
+Express API on port 8080
+
+Production dependencies only
+
+Local Test
+docker compose build
+docker compose up
+
+☸️ PHASE 5 — Kubernetes (EKS) Deployment Using Helm
+
+A complete Helm chart was written:
+
+myapp-chart/
+├── templates/
+│   ├── deployment-frontend.yaml
+│   ├── deployment-backend.yaml
+│   ├── service-frontend.yaml
+│   ├── service-backend.yaml
+│   ├── ingress.yaml
+│   ├── configmap.yaml
+│   └── secrets.yaml
+└── values.yaml
+
+AWS Load Balancer Controller
+
+Installed & configured to allow Kubernetes to dynamically create ALBs.
+
+Deployment
+helm upgrade --install myapp ./myapp-chart -n myapp
+kubectl get ingress -n myapp
+
+Result
+
+Kubernetes generated a real AWS ALB with DNS exposed to the internet.
+
+🔁 PHASE 6 — Full CI/CD (Jenkins → ECR → Helm → EKS)
+
+Here is the actual CI/CD flow:
+
+sequenceDiagram
+    participant Dev as Developer
+    participant GitHub
+    participant Jenkins
+    participant ECR
+    participant Helm
+    participant EKS
+
+    Dev->>GitHub: Push Code
+    GitHub->>Jenkins: Webhook Trigger
+    Jenkins->>Jenkins: Build Docker Images
+    Jenkins->>ECR: Push Images
+    Jenkins->>Helm: Update Release
+    Helm->>EKS: Rolling Deployment
+    EKS->>Dev: New Version Live
+
+What Jenkins Automates
+
+Build images
+
+Tag as latest
+
+Push to ECR
+
+Set KUBECONFIG
+
+Run helm upgrade
+
+Trigger rolling update in EKS
+
+Jenkinsfile (clean & final)
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = "us-east-1"
+        ECR_BACKEND = "REDACTED.dkr.ecr.us-east-1.amazonaws.com/myapp-backend"
+        ECR_FRONTEND = "REDACTED.dkr.ecr.us-east-1.amazonaws.com/myapp-frontend"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps { checkout scm }
+        }
+
+        stage('Build Backend Image') {
+            steps {
+                sh """
+                cd backend
+                docker build -t myapp-backend .
+                docker tag myapp-backend:latest $ECR_BACKEND:latest
+                """
+            }
+        }
+
+        stage('Build Frontend Image') {
+            steps {
+                sh """
+                cd frontend
+                docker build -t myapp-frontend .
+                docker tag myapp-frontend:latest $ECR_FRONTEND:latest
+                """
+            }
+        }
+
+        stage('Login to ECR') {
+            steps {
+                sh """
+                aws ecr get-login-password --region us-east-1 |
+                docker login --username AWS --password-stdin $ECR_BACKEND
+                """
+            }
+        }
+
+        stage('Push Images') {
+            steps {
+                sh """
+                docker push $ECR_BACKEND:latest
+                docker push $ECR_FRONTEND:latest
+                """
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                sh """
+                export KUBECONFIG=/var/lib/jenkins/kubeconfig
+                helm upgrade --install myapp ./myapp-chart -n myapp
+                """
+            }
+        }
+    }
+}
+
+📡 PHASE 7 — Monitoring, Logging & Blue/Green Deployments
+
+Phase 7 ensured CloudNorth is observable, reliable, and resilient.
+
+📊 Monitoring Stack
+
+CloudWatch Dashboards (CPU, Memory, ALB, EKS)
+
+SNS Alerts (High CPU, Pod CrashLoop, Budget)
+
+EKS Cluster Logging → CloudWatch
+
+🔵🟢 Blue/Green Deployments
+
+Achieved using Helm strategies:
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+
+For frontend + backend:
+
+new pods spin up
+
+health checks validate
+
+traffic shifts only after success
+
+This ensures zero downtime deployments.
+
+🧪 Quick Start for Developers
 git clone https://github.com/Bettymusari/cloudnorth-platform.git
 cd cloudnorth-platform
-git checkout dev
 
-# Install dependencies
 cd frontend && npm install
-cd ../backend && npm install
-Infrastructure Deployment
-bash
+cd backend && npm install
+
+
+Infrastructure:
+
 cd infrastructure/terraform
 terraform init
-terraform plan
 terraform apply
-🛠️ Technology Stack
+
+
+Local containers:
+
+docker compose up --build
+
+🧱 Tech Stack
 Frontend
-Framework: Next.js 14 with React 18
 
-Styling: Tailwind CSS
+Next.js 14
 
-State Management: Zustand
+React 18
 
-Testing: Jest + React Testing Library
+Tailwind
+
+Zustand
+
+Jest
 
 Backend
-Runtime: Node.js with Express
 
-Database: AWS RDS MySQL
+Node.js + Express
 
-Authentication: JWT
+MySQL (RDS)
 
-Testing: Jest + Supertest
+JWT Auth
 
-Infrastructure & DevOps
-Cloud: AWS
+Jest + Supertest
 
-IaC: Terraform (modular design)
+DevOps
 
-Containers: Docker + EKS
+Terraform
 
-CI/CD: GitHub Actions
+AWS (RDS, ALB, EKS, EC2, S3)
 
-Monitoring: CloudWatch + SNS
+Jenkins CI/CD
 
-👥 Development Workflow
-Branch Strategy
-main - Production-ready code (protected)
+ECR
 
-dev - Development and integration (protected)
+Helm
 
-feature/* - Feature development
+Kubernetes
 
-hotfix/* - Production fixes
-
-PR Process
-Create feature branch from dev
-
-Make changes and test
-
-Push and create PR to dev
-
-Code review (self-review for solo development)
-
-Merge after approval
-
-Delete feature branch
-
-🏗️ Architecture Details
-Cloud Infrastructure
-Multi-AZ Deployment: High availability across availability zones
-
-Security: Private subnets for databases, security groups with minimal access
-
-Scalability: EKS auto-scaling, ALB load distribution
-
-Monitoring: Real-time metrics and alerting
-
-Application Architecture
-Microservices Ready: EKS cluster prepared for containerized services
-
-API-First Design: Backend API with frontend consumer
-
-Static Assets: S3 with CloudFront-ready structure
-
-Database: RDS with private subnet security
-
-📚 Documentation
-Contributing Guide - Development workflow and standards
-
-Infrastructure Docs - Terraform modules and AWS setup
-
-API Documentation - Backend API specifications
+CloudWatch + SNS
 
 🤝 Contributing
-We welcome contributions! Please read our Contributing Guide before submitting pull requests.
-
-Development Process
-Fork the repository
-
-Create a feature branch (git checkout -b feature/amazing-feature)
-
-Commit your changes (git commit -m 'Add amazing feature')
-
-Push to the branch (git push origin feature/amazing-feature)
-
-Open a Pull Request
-
-📞 Support
-GitHub Issues: Report bugs or request features
-
-Documentation: Check the /docs directory
+git checkout -b feature/amazing-feature
+git commit -m "feat: add amazing feature"
+git push origin feature/amazing-feature
 
 📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+
+MIT License
 
 🙏 Acknowledgments
-AWS for cloud infrastructure
 
-HashiCorp for Terraform
+AWS
 
-The open-source community
+HashiCorp Terraform
+
+Kubernetes
+
+The Open Source Community
