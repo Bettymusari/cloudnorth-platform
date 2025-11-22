@@ -5,6 +5,14 @@ yarn-debug.log*
 yarn-error.log*
 .lock-wscript
 
+*.env
+*.tfvars
+secrets.json
+config.json
+*.pem
+*.secret
+
+
 # Python
 __pycache__/
 *.py[cod]
