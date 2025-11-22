@@ -3,11 +3,11 @@ pipeline {
 
     environment {
         REGISTRY_CREDENTIALS = 'dockerhub-creds'
-        DOCKERHUB_USERNAME = 'bettym72'
-        BACKEND_IMAGE = 'bettym72/cloudnorth-backend'
-        FRONTEND_IMAGE = 'bettym72/cloudnorth-frontend'
-        AWS_REGION = 'us-east-1'
-        EKS_CLUSTER = 'cloudnorth-cluster'
+        DOCKERHUB_USERNAME   = 'bettym72'
+        BACKEND_IMAGE        = 'bettym72/cloudnorth-backend'
+        FRONTEND_IMAGE       = 'bettym72/cloudnorth-frontend'
+        AWS_REGION           = 'us-east-1'
+        EKS_CLUSTER          = 'cloudnorth-cluster'
     }
 
     stages {
@@ -15,10 +15,10 @@ pipeline {
         /* -------------------- CHECKOUT -------------------- */
         stage('Checkout') {
             steps {
-                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
                     sh '''
                         rm -rf cloudnorth-platform || true
-                        git clone https://$GITHUB_TOKEN@github.com/Bettymusari/cloudnorth-platform.git
+                        git clone https://$GH_USER:$GH_TOKEN@github.com/Bettymusari/cloudnorth-platform.git
                         cd cloudnorth-platform
                         git checkout feature/ci-cd-pipeline
                     '''
