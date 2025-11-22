@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudnorth-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: cloudnorth-backend
+  ports:
+    - port: 3001
+      targetPort: 3001

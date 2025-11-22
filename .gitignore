@@ -66,6 +66,7 @@ cloudnorth-root/terraform.tfstate.backup
 cloudnorth-root/*.pem
 cloudnorth-root/*keypair*
 cloudnorth-root/.terraform.lock.hcl
+cloudnorth-root/.terraform.tfvars
 
 # Terraform crash logs
 crash.log
